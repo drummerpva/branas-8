@@ -1,0 +1,22 @@
+{
+  "name": "branas-8",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Douglas Poma <douglaspoma@yahoo.com>",
+  "license": "MIT",
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "build": "tsup src/main.ts",
+    "start": "node dist/main",
+    "test": "vitest"
+  },
+  "devDependencies": {
+    "@rocketseat/eslint-config": "^2.1.0",
+    "@types/node": "^20.10.4",
+    "eslint": "^8.55.0",
+    "tsup": "^8.0.1",
+    "tsx": "^4.6.2",
+    "typescript": "^5.3.3",
+    "vitest": "^1.0.2"
+  }
+}
