@@ -1,36 +1,34 @@
-import { validate } from '../../../src/validateCPF/v2/validate'
+import { Cpf } from '../src/Cpf'
 
 test.each(['259.556.978-37'])(
   'Deve validar o cpf que tem dígito maior que 0',
-  (cpf: string) => {
-    const isValid = validate(cpf)
-    expect(isValid).toBe(true)
+  (cpfRaw: string) => {
+    const cpf = new Cpf(cpfRaw)
+    expect(cpf.getValue()).toBeTruthy()
   },
 )
 test.each(['98765432100', '12345678909'])(
   'Deve validar o cpf com dígito zero no primeiro digito',
-  (cpf: string) => {
-    const isValid = validate(cpf)
-    expect(isValid).toBe(true)
+  (cpfRaw: string) => {
+    const cpf = new Cpf(cpfRaw)
+    expect(cpf.getValue()).toBeTruthy()
   },
 )
 test.each(['98765432100'])(
   'Deve validar o cpf com dígito zero no segundo digito',
-  (cpf: string) => {
-    const isValid = validate(cpf)
-    expect(isValid).toBe(true)
+  (cpfRaw: string) => {
+    const cpf = new Cpf(cpfRaw)
+    expect(cpf.getValue()).toBeTruthy()
   },
 )
 test.each(['147.085.437-600'])(
   'Deve retornar false quando o cpf tiver mais de 14 caracteres',
   (cpf: string) => {
-    const isValid = validate(cpf)
-    expect(isValid).toBe(false)
+    expect(() => new Cpf(cpf)).toThrowError('Cpf inválido')
   },
 )
 test.each([null, undefined])('Deve tentar valida o cpf null', (cpf: any) => {
-  const isValid = validate(cpf)
-  expect(isValid).toBe(false)
+  expect(() => new Cpf(cpf)).toThrowError('Cpf inválido')
 })
 test.each([
   '111.111.111-11',
@@ -43,6 +41,5 @@ test.each([
   '999.999.999-99',
   '000.000.000-00',
 ])('Deve tentar valida o cpf com caracteres repetidos', (cpf: string) => {
-  const isValid = validate(cpf)
-  expect(isValid).toBe(false)
+  expect(() => new Cpf(cpf)).toThrowError('Cpf inválido')
 })
