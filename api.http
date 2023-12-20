@@ -1,0 +1,11 @@
+###
+@url = http://localhost:3000
+@urlCurrency = http://localhost:3001
+###
+GET {{urlCurrency}}/currencies
+###
+GET {{url}}/
+###
+@cardNumber = 1234123412341234
+###
+GET {{url}}/cards/{{cardNumber}}/invoices
