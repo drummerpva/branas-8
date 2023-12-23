@@ -3,11 +3,15 @@ import { GetOrderByCpf } from './application/usecase/GetOrderByCpf'
 import { Preview } from './application/usecase/Preview'
 import { Item } from './domain/entity/Item'
 import { OrderController } from './infra/controller/OrderController'
+import { Mysql2Adapter } from './infra/database/Mysql2Adapter'
 import { ExpressAdapter } from './infra/http/ExpressAdapter'
+import { ItemRepositoryDatabase } from './infra/repository/ItemRepositoryDatabase'
 import { ItemRepositoryMemory } from './infra/repository/ItemRepositoryMemory'
 import { OrderRepositoryMemory } from './infra/repository/OrderRepositoryMemory'
 
 const itemRepository = new ItemRepositoryMemory()
+// const connection = new Mysql2Adapter()
+// const itemRepository = new ItemRepositoryDatabase(connection)
 const orderRepository = new OrderRepositoryMemory()
 itemRepository.save(new Item(1, 'Guitarra', 1000))
 itemRepository.save(new Item(2, 'Amplificador', 5000))
