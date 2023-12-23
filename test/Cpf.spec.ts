@@ -1,4 +1,4 @@
-import { Cpf } from '../src/Cpf'
+import { Cpf } from '../src/domain/entity/Cpf'
 
 test.each(['259.556.978-37'])(
   'Deve validar o cpf que tem dígito maior que 0',
