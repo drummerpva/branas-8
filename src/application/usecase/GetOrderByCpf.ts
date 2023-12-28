@@ -9,6 +9,7 @@ export class GetOrderByCpf {
     for (const order of orders) {
       output.push({
         total: order.getTotal(),
+        code: order.getCode(),
       })
     }
     return output
@@ -17,4 +18,5 @@ export class GetOrderByCpf {
 
 type Output = {
   total: number
+  code: string
 }

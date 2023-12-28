@@ -14,4 +14,8 @@ export class OrderRepositoryMemory implements OrderRepository {
   async getByCpf(cpf: string): Promise<Order[]> {
     return this.orders.filter((order) => order.cpf.getValue() === cpf)
   }
+
+  async count(): Promise<number> {
+    return this.orders.length
+  }
 }

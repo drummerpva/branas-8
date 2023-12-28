@@ -11,7 +11,8 @@ export class Checkout {
   ) {}
 
   async execute(input: Input): Promise<void> {
-    const order = new Order(input.cpf)
+    const nextSequence = (await this.orderRepository.count()) + 1
+    const order = new Order(input.cpf, input.date, nextSequence)
     for (const orderItem of input.orderItems) {
       const item = await this.itemRepository.getItem(orderItem.idItem)
       order.addItem(item, orderItem.quantity)
@@ -31,4 +32,9 @@ type OrderItem = {
   quantity: number
 }
 
-type Input = { cpf: string; orderItems: OrderItem[]; coupon?: string }
+type Input = {
+  cpf: string
+  orderItems: OrderItem[]
+  coupon?: string
+  date?: Date
+}
