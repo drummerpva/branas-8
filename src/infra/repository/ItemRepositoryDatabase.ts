@@ -1,4 +1,5 @@
 import { ItemRepository } from '../../application/repository/ItemRepository'
+import { Dimension } from '../../domain/entity/Dimension'
 import { Item } from '../../domain/entity/Item'
 import { Connection } from '../database/Connection'
 
@@ -10,7 +11,17 @@ export class ItemRepositoryDatabase implements ItemRepository {
       'SELECT * FROM item WHERE id = ?',
       [idItem],
     )
-    const item = new Item(itemData.id, itemData.nome, itemData.valor)
+    const item = new Item(
+      itemData.id,
+      itemData.nome,
+      itemData.valor,
+      new Dimension(
+        itemData.largura,
+        itemData.altura,
+        itemData.profundidade,
+        itemData.peso,
+      ),
+    )
     return item
   }
 
