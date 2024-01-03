@@ -60,12 +60,6 @@ test('Não deve criar um pedido com o mesmo item', () => {
     'Duplicated item',
   )
 })
-test('Deve criar um pedido com frete', () => {
-  const order = new Order('987.654.321-00')
-  order.addItem(new Item(1, 'Guitarra', 1000, new Dimension(100, 30, 10, 3)), 1)
-  const total = order.getTotal()
-  expect(total).toBe(1030)
-})
 test('Deve criar um pedido com código', () => {
   const order = new Order('987.654.321-00', new Date('2021-03-10T10:00:00'))
   order.addItem(new Item(1, 'Guitarra', 1000, new Dimension(100, 30, 10, 3)), 1)
