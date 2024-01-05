@@ -3,10 +3,10 @@ import { ItemRepository } from '../../application/repository/ItemRepository'
 import { OrderRepository } from '../../application/repository/OrderRepository'
 import { ZipCodeRepository } from '../../application/repository/ZipCodeRepository'
 import { RepositoryFactory } from '../../domain/factory/RepositoryFactory'
-import { CouponRepositoryMemory } from '../repository/CouponRepositoryMemory'
-import { ItemRepositoryMemory } from '../repository/ItemRepositoryMemory'
-import { OrderRepositoryMemory } from '../repository/OrderRepositoryMemory'
-import { ZipCodeRepositoryMemory } from '../repository/ZipCodeRepositoryMemory'
+import { CouponRepositoryMemory } from '../repository/memory/CouponRepositoryMemory'
+import { ItemRepositoryMemory } from '../repository/memory/ItemRepositoryMemory'
+import { OrderRepositoryMemory } from '../repository/memory/OrderRepositoryMemory'
+import { ZipCodeRepositoryMemory } from '../repository/memory/ZipCodeRepositoryMemory'
 
 export class RepositoyFactoryMemory implements RepositoryFactory {
   itemRepository?: ItemRepository

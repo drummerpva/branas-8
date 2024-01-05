@@ -1,14 +1,14 @@
-import { ItemRepositoryMemory } from '../src/infra/repository/ItemRepositoryMemory'
+import { ItemRepositoryMemory } from '../src/infra/repository/memory/ItemRepositoryMemory'
 import { Preview } from '../src/application/usecase/Preview'
 import { Item } from '../src/domain/entity/Item'
 import { CouponRepository } from '../src/application/repository/CouponRepository'
 import { ItemRepository } from '../src/application/repository/ItemRepository'
 import { Coupon } from '../src/domain/entity/Coupon'
-import { CouponRepositoryMemory } from '../src/infra/repository/CouponRepositoryMemory'
+import { CouponRepositoryMemory } from '../src/infra/repository/memory/CouponRepositoryMemory'
 import { ZipCodeRepository } from '../src/application/repository/ZipCodeRepository'
 import { Connection } from '../src/infra/database/Connection'
 import { Mysql2Adapter } from '../src/infra/database/Mysql2Adapter'
-import { ZipCodeRepositoryDatabase } from '../src/infra/repository/ZipCodeRepositoryDatabase'
+import { ZipCodeRepositoryDatabase } from '../src/infra/repository/database/ZipCodeRepositoryDatabase'
 import { Dimension } from '../src/domain/entity/Dimension'
 let itemRepository: ItemRepository
 let couponRepository: CouponRepository

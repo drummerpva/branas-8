@@ -1,4 +1,4 @@
-import { OrderRepositoryMemory } from '../src/infra/repository/OrderRepositoryMemory'
+import { OrderRepositoryMemory } from '../src/infra/repository/memory/OrderRepositoryMemory'
 import { Checkout } from '../src/application/usecase/Checkout'
 import { GetOrderByCpf } from '../src/application/usecase/GetOrderByCpf'
 import { Item } from '../src/domain/entity/Item'

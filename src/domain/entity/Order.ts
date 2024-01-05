@@ -2,13 +2,14 @@ import { Coupon } from './Coupon'
 import { Cpf } from './Cpf'
 import { Item } from './Item'
 import { OrderCode } from './OrderCode'
+import { OrderCoupon } from './OrderCounpon'
 import { OrderItem } from './OrderItem'
 
 export class Order {
   cpf: Cpf
   orderItems: OrderItem[]
   private code: OrderCode
-  coupon?: Coupon
+  coupon?: OrderCoupon
   freight = 0
   constructor(
     cpf: string,
@@ -27,7 +28,8 @@ export class Order {
   }
 
   addCoupon(coupon: Coupon) {
-    this.coupon = coupon
+    if (coupon.isExpired(this.date)) return
+    this.coupon = new OrderCoupon(coupon.code, coupon.percentage)
   }
 
   getCode() {
@@ -40,7 +42,7 @@ export class Order {
       0,
     )
     if (this.coupon) {
-      total -= this.coupon.calculateDiscount(total, this.date)
+      total -= this.coupon.calculateDiscount(total)
     }
     total += this.freight
     return total

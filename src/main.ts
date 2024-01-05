@@ -9,9 +9,9 @@ import { Mysql2Adapter } from './infra/database/Mysql2Adapter'
 import { RepositoyFactoryMemory } from './infra/factory/RepositoryFactoryMemory'
 import { ExpressAdapter } from './infra/http/ExpressAdapter'
 import { HapiAdapter } from './infra/http/HapiAdapter'
-import { CouponRepositoryMemory } from './infra/repository/CouponRepositoryMemory'
-import { ItemRepositoryDatabase } from './infra/repository/ItemRepositoryDatabase'
-import { OrderRepositoryMemory } from './infra/repository/OrderRepositoryMemory'
+import { CouponRepositoryMemory } from './infra/repository/memory/CouponRepositoryMemory'
+import { ItemRepositoryDatabase } from './infra/repository/database/ItemRepositoryDatabase'
+import { OrderRepositoryMemory } from './infra/repository/memory/OrderRepositoryMemory'
 
 const connection = new Mysql2Adapter()
 const itemRepository = new ItemRepositoryDatabase(connection)

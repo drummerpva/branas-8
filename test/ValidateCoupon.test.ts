@@ -1,7 +1,7 @@
 import { CouponRepository } from '../src/application/repository/CouponRepository'
 import { ValidateCoupon } from '../src/application/usecase/ValidateCoupon'
 import { Coupon } from '../src/domain/entity/Coupon'
-import { CouponRepositoryMemory } from '../src/infra/repository/CouponRepositoryMemory'
+import { CouponRepositoryMemory } from '../src/infra/repository/memory/CouponRepositoryMemory'
 
 let couponRepository: CouponRepository
 

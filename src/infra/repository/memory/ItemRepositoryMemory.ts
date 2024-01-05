@@ -1,5 +1,5 @@
-import { ItemRepository } from '../../application/repository/ItemRepository'
-import { Item } from '../../domain/entity/Item'
+import { ItemRepository } from '../../../application/repository/ItemRepository'
+import { Item } from '../../../domain/entity/Item'
 
 export class ItemRepositoryMemory implements ItemRepository {
   private items: Item[] = []

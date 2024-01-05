@@ -5,8 +5,8 @@ import { Dimension } from '../src/domain/entity/Dimension'
 import { Item } from '../src/domain/entity/Item'
 import { Connection } from '../src/infra/database/Connection'
 import { Mysql2Adapter } from '../src/infra/database/Mysql2Adapter'
-import { ItemRepositoryMemory } from '../src/infra/repository/ItemRepositoryMemory'
-import { ZipCodeRepositoryDatabase } from '../src/infra/repository/ZipCodeRepositoryDatabase'
+import { ItemRepositoryMemory } from '../src/infra/repository/memory/ItemRepositoryMemory'
+import { ZipCodeRepositoryDatabase } from '../src/infra/repository/database/ZipCodeRepositoryDatabase'
 
 let itemRepository: ItemRepository
 let zipCodeRepository: ZipCodeRepository
