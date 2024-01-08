@@ -6,6 +6,4 @@ export abstract class Item {
   ) {
     if (price <= 0) throw new Error('Invalid price')
   }
-
-  abstract calculateTax(): number
 }

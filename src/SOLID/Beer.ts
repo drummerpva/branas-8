@@ -1,6 +1,6 @@
-import { Item } from './Item'
+import { TaxItem } from './TaxItem'
 
-export class Beer extends Item {
+export class Beer extends TaxItem {
   constructor(description: string, price: number) {
     super('Beer', description, price)
   }

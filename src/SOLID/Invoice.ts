@@ -1,4 +1,5 @@
 import { Item } from './Item'
+import { TaxItem } from './TaxItem'
 
 export class Invoice {
   items: Item[]
@@ -14,8 +15,7 @@ export class Invoice {
   calculateTaxes(): number {
     let taxes = 0
     for (const item of this.items) {
-      if (item.category !== 'Water' && item.category !== 'Juice')
-        taxes += item.calculateTax()
+      if (item instanceof TaxItem) taxes += item.calculateTax()
     }
     return taxes
   }
