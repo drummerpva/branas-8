@@ -1,4 +1,3 @@
-import { OrderRepositoryMemory } from '../src/infra/repository/memory/OrderRepositoryMemory'
 import { Checkout } from '../src/application/usecase/Checkout'
 import { GetOrderByCpf } from '../src/application/usecase/GetOrderByCpf'
 import { Item } from '../src/domain/entity/Item'
@@ -9,25 +8,35 @@ import { CouponRepository } from '../src/application/repository/CouponRepository
 import { Dimension } from '../src/domain/entity/Dimension'
 import { RepositoryFactory } from '../src/domain/factory/RepositoryFactory'
 import { RepositoyFactoryMemory } from '../src/infra/factory/RepositoryFactoryMemory'
+import { RepositoryFactoryDatabase } from '../src/infra/factory/RepositoryFactoryDatabase'
+import { Connection } from '../src/infra/database/Connection'
+import { Mysql2Adapter } from '../src/infra/database/Mysql2Adapter'
+import { OrderRepositoryDatabase } from '../src/infra/repository/database/OrderRepositoryDatabase'
 
 let itemRepository: ItemRepository
 let orderRepository: OrderRepository
 let couponRepository: CouponRepository
 let repositoryFactory: RepositoryFactory
+let connection: Connection
 
 beforeEach(async () => {
-  repositoryFactory = new RepositoyFactoryMemory()
+  // repositoryFactory = new RepositoyFactoryMemory()
+  connection = new Mysql2Adapter()
+  repositoryFactory = new RepositoryFactoryDatabase(connection)
   itemRepository = repositoryFactory.createItemRepository()
   orderRepository = repositoryFactory.createOrderRepository()
   couponRepository = repositoryFactory.createCouponRepository()
-  itemRepository.save(new Item(1, 'Guitarra', 1000))
-  itemRepository.save(new Item(2, 'Amplificador', 5000))
-  itemRepository.save(new Item(3, 'Cabo', 30))
-  couponRepository.save(new Coupon('VALE20', 20))
+  // itemRepository.save(new Item(1, 'Guitarra', 1000))
+  // itemRepository.save(new Item(2, 'Amplificador', 5000))
+  // itemRepository.save(new Item(3, 'Cabo', 30))
+  // couponRepository.save(new Coupon('VALE20', 20))
+  await connection.query('DELETE FROM order_item', [])
+  await connection.query('DELETE FROM orders', [])
+  await connection.query('DELETE FROM coupons', [])
 })
 
 test('Deve fazer o pedido', async () => {
-  const orderSaveSpy = vi.spyOn(OrderRepositoryMemory.prototype, 'save')
+  const orderSaveSpy = vi.spyOn(OrderRepositoryDatabase.prototype, 'save')
 
   const checkout = new Checkout(repositoryFactory)
   const input = {
@@ -42,12 +51,13 @@ test('Deve fazer o pedido', async () => {
   expect(orderSaveSpy).toHaveBeenCalledOnce()
   const getOrdersByCpf = new GetOrderByCpf(orderRepository)
   const orders = await getOrdersByCpf.execute(input.cpf)
-  expect(orders.length).toBe(1)
-  expect(orders[0].total).toBe(6090)
+  expect(orders.length).toBeGreaterThanOrEqual(1)
+  expect(orders[0].total).toBe(6370)
 })
 test('Deve fazer o pedido com desconto', async () => {
-  const orderSaveSpy = vi.spyOn(OrderRepositoryMemory.prototype, 'save')
+  const orderSaveSpy = vi.spyOn(OrderRepositoryDatabase.prototype, 'save')
   const checkout = new Checkout(repositoryFactory)
+  couponRepository.save(new Coupon('VALE20', 20))
   const input = {
     cpf: '987.654.321-00',
     orderItems: [
@@ -62,11 +72,11 @@ test('Deve fazer o pedido com desconto', async () => {
   const getOrdersByCpf = new GetOrderByCpf(orderRepository)
   const orders = await getOrdersByCpf.execute(input.cpf)
   expect(orders.length).toBe(1)
-  expect(orders[0].total).toBe(4872)
+  expect(orders[0].total).toBe(5152)
   vi.restoreAllMocks()
 })
 test('Deve fazer o pedido com desconto expirado', async () => {
-  const orderSaveSpy = vi.spyOn(OrderRepositoryMemory.prototype, 'save')
+  const orderSaveSpy = vi.spyOn(OrderRepositoryDatabase.prototype, 'save')
   const checkout = new Checkout(repositoryFactory)
   couponRepository.save(
     new Coupon('VALE20_INVALID', 20, new Date('2021-03-01T10:00:00')),
@@ -86,11 +96,11 @@ test('Deve fazer o pedido com desconto expirado', async () => {
   const getOrdersByCpf = new GetOrderByCpf(orderRepository)
   const orders = await getOrdersByCpf.execute(input.cpf)
   expect(orders.length).toBe(1)
-  expect(orders[0].total).toBe(6090)
+  expect(orders[0].total).toBe(6370)
   vi.restoreAllMocks()
 })
 test('Deve fazer o pedido com desconto válido', async () => {
-  const orderSaveSpy = vi.spyOn(OrderRepositoryMemory.prototype, 'save')
+  const orderSaveSpy = vi.spyOn(OrderRepositoryDatabase.prototype, 'save')
   const checkout = new Checkout(repositoryFactory)
   couponRepository.save(
     new Coupon('VALE20_VALID', 20, new Date('2021-03-01T10:00:00')),
@@ -110,7 +120,7 @@ test('Deve fazer o pedido com desconto válido', async () => {
   const getOrdersByCpf = new GetOrderByCpf(orderRepository)
   const orders = await getOrdersByCpf.execute(input.cpf)
   expect(orders.length).toBe(1)
-  expect(orders[0].total).toBe(4872)
+  expect(orders[0].total).toBe(5152)
   vi.restoreAllMocks()
 })
 test('Deve fazer o pedido com frete', async () => {

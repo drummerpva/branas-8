@@ -8,7 +8,25 @@ export class OrderRepositoryDatabase implements OrderRepository {
   constructor(readonly connection: Connection) {}
 
   async save(order: Order): Promise<void> {
-    throw new Error('Method not implemented.')
+    const { insertId: orderId } = await this.connection.query(
+      `INSERT INTO orders(coupon_code, coupon_percentage, code, cpf, issue_date, sequence, total, freight) VALUES(?,?,?,?,?,?,?,?)`,
+      [
+        order.coupon?.code,
+        order.coupon?.percentage,
+        order.getCode(),
+        order.cpf.getValue(),
+        order.date,
+        order.sequence,
+        order.getTotal(),
+        order.freight,
+      ],
+    )
+    for (const orderItem of order.orderItems) {
+      await this.connection.query(
+        `INSERT INTO order_item(id_order, id_item, price, quantity) VALUES(?,?,?,?)`,
+        [orderId, orderItem.idItem, orderItem.price, orderItem.quantity],
+      )
+    }
   }
 
   async getByCpf(cpf: string): Promise<Order[]> {
@@ -18,7 +36,11 @@ export class OrderRepositoryDatabase implements OrderRepository {
       [cpf],
     )
     for (const orderData of ordersData) {
-      const order = new Order(orderData.cpf, orderData.date, orderData.sequence)
+      const order = new Order(
+        orderData.cpf,
+        orderData.issue_date,
+        orderData.sequence,
+      )
       order.freight = Number(orderData.freight)
       if (orderData.coupon_code) {
         order.coupon = new OrderCoupon(
@@ -27,14 +49,14 @@ export class OrderRepositoryDatabase implements OrderRepository {
         )
       }
       const orderItemsData = await this.connection.query(
-        'SELECT * FROM order_item WHERE order_id = ?',
-        [orderData.id],
+        'SELECT * FROM order_item WHERE id_order = ?',
+        [orderData.id_order],
       )
       for (const orderItemData of orderItemsData) {
         order.orderItems.push(
           new OrderItem(
-            orderItemData.id,
-            Number(orderItemData.valor),
+            orderItemData.id_item,
+            Number(orderItemData.price),
             orderItemData.quantity,
           ),
         )
@@ -45,6 +67,10 @@ export class OrderRepositoryDatabase implements OrderRepository {
   }
 
   async count(): Promise<number> {
-    throw new Error('Method not implemented.')
+    const [countData] = await this.connection.query(
+      'SELECT COUNT(1) AS count FROM orders',
+      [],
+    )
+    return countData.count
   }
 }

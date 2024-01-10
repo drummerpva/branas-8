@@ -10,7 +10,7 @@ export class Mysql2Adapter implements Connection {
   }
 
   async query(statement: string, params: any[]): Promise<any> {
-    const [result] = await this.connection.execute(statement, params)
+    const [result] = await this.connection.query(statement, params)
     return result
   }
 
