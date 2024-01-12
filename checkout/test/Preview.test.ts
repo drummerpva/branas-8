@@ -5,21 +5,19 @@ import { CouponRepository } from '../src/application/repository/CouponRepository
 import { ItemRepository } from '../src/application/repository/ItemRepository'
 import { Coupon } from '../src/domain/entity/Coupon'
 import { CouponRepositoryMemory } from '../src/infra/repository/memory/CouponRepositoryMemory'
-import { ZipCodeRepository } from '../src/application/repository/ZipCodeRepository'
-import { Connection } from '../src/infra/database/Connection'
-import { Mysql2Adapter } from '../src/infra/database/Mysql2Adapter'
-import { ZipCodeRepositoryDatabase } from '../src/infra/repository/database/ZipCodeRepositoryDatabase'
 import { Dimension } from '../src/domain/entity/Dimension'
+import { CalculateFreightGateway } from '../src/application/gateway/CalculateFreightGateway'
 let itemRepository: ItemRepository
 let couponRepository: CouponRepository
-let connection: Connection
-let zipCodeRepository: ZipCodeRepository
+let calculateFreightGateway: CalculateFreightGateway
 beforeEach(async () => {
-  connection = new Mysql2Adapter()
-  zipCodeRepository = new ZipCodeRepositoryDatabase(connection)
   itemRepository = new ItemRepositoryMemory()
   couponRepository = new CouponRepositoryMemory()
   couponRepository.save(new Coupon('VALE20', 20))
+  calculateFreightGateway = {
+    calculate: vi.fn().mockResolvedValue(0),
+  }
+  // calculateFreightGateway = new CalculateFreightGatewayHttp()
 })
 test('Deve simular um pedido', async () => {
   itemRepository.save(new Item(1, 'Guitarra', 1000))
@@ -28,7 +26,7 @@ test('Deve simular um pedido', async () => {
   const preview = new Preview(
     itemRepository,
     couponRepository,
-    zipCodeRepository,
+    calculateFreightGateway,
   )
   const input = {
     cpf: '987.654.321-00',
@@ -48,7 +46,7 @@ test('Deve simular um pedido com desconto', async () => {
   const preview = new Preview(
     itemRepository,
     couponRepository,
-    zipCodeRepository,
+    calculateFreightGateway,
   )
   const input = {
     cpf: '987.654.321-00',
@@ -63,13 +61,16 @@ test('Deve simular um pedido com desconto', async () => {
   expect(result).toBe(4872)
 })
 test('Deve simular um pedido com distância', async () => {
+  calculateFreightGateway = {
+    calculate: vi.fn().mockResolvedValue(22.45),
+  }
   itemRepository.save(
     new Item(1, 'Guitarra', 1000, new Dimension(100, 30, 10, 3)),
   )
   const preview = new Preview(
     itemRepository,
     couponRepository,
-    zipCodeRepository,
+    calculateFreightGateway,
   )
   const input = {
     cpf: '987.654.321-00',
