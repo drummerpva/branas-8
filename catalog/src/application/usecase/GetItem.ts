@@ -11,6 +11,10 @@ export class GetItem {
       price: item.price,
       volume: item.getVolume(),
       density: item.getDensity(),
+      height: item.dimension?.height,
+      width: item.dimension?.width,
+      length: item.dimension?.length,
+      weight: item.dimension?.weight,
     }
   }
 }
@@ -21,4 +25,8 @@ type Outuput = {
   price: number
   volume: number
   density: number
+  height?: number
+  width?: number
+  length?: number
+  weight?: number
 }

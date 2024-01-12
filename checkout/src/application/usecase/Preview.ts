@@ -1,11 +1,11 @@
-import { ItemRepository } from '../repository/ItemRepository'
 import { Order } from '../../domain/entity/Order'
 import { CouponRepository } from '../repository/CouponRepository'
 import { CalculateFreightGateway } from '../gateway/CalculateFreightGateway'
+import { CatalogGateway } from '../gateway/CatalogGateway'
 
 export class Preview {
   constructor(
-    readonly itemRepository: ItemRepository,
+    readonly catalogGateway: CatalogGateway,
     readonly couponRepository: CouponRepository,
     readonly calculateFreightGateway: CalculateFreightGateway,
   ) {}
@@ -14,7 +14,7 @@ export class Preview {
     const orderItems = []
     const order = new Order(input.cpf)
     for (const orderItem of input.orderItems) {
-      const item = await this.itemRepository.getItem(orderItem.idItem)
+      const item = await this.catalogGateway.getItem(orderItem.idItem)
       order.addItem(item, orderItem.quantity)
       orderItems.push({
         volume: item.getVolume(),

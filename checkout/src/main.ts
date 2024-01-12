@@ -13,6 +13,7 @@ import { ItemRepositoryDatabase } from './infra/repository/database/ItemReposito
 import { OrderRepositoryMemory } from './infra/repository/memory/OrderRepositoryMemory'
 import { ZipCodeRepositoryDatabase } from './infra/repository/database/ZipCodeRepositoryDatabase'
 import { CalculateFreightGatewayHttp } from './infra/gateway/CalculateFreightGatewayHttp'
+import { CatalogGatewayHttp } from './infra/gateway/CatalogGatewayHttp'
 
 const connection = new Mysql2Adapter()
 const itemRepository = new ItemRepositoryDatabase(connection)
@@ -24,8 +25,9 @@ couponRepository.save(new Coupon('VALE20', 20))
 //   calculate: async () => 280,
 // }
 const calculateFreightGateway = new CalculateFreightGatewayHttp()
+const catalogGateway = new CatalogGatewayHttp()
 const preview = new Preview(
-  itemRepository,
+  catalogGateway,
   couponRepository,
   calculateFreightGateway,
 )
