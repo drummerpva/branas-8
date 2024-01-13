@@ -7,13 +7,13 @@ import { Coupon } from './domain/entity/Coupon'
 import { OrderController } from './infra/controller/OrderController'
 import { Mysql2Adapter } from './infra/database/Mysql2Adapter'
 import { RepositoyFactoryMemory } from './infra/factory/RepositoryFactoryMemory'
-import { HapiAdapter } from './infra/http/HapiAdapter'
 import { CouponRepositoryMemory } from './infra/repository/memory/CouponRepositoryMemory'
 import { ItemRepositoryDatabase } from './infra/repository/database/ItemRepositoryDatabase'
 import { OrderRepositoryMemory } from './infra/repository/memory/OrderRepositoryMemory'
 import { ZipCodeRepositoryDatabase } from './infra/repository/database/ZipCodeRepositoryDatabase'
 import { CalculateFreightGatewayHttp } from './infra/gateway/CalculateFreightGatewayHttp'
 import { CatalogGatewayHttp } from './infra/gateway/CatalogGatewayHttp'
+import { ExpressAdapter } from './infra/http/ExpressAdapter'
 
 const connection = new Mysql2Adapter()
 const itemRepository = new ItemRepositoryDatabase(connection)
@@ -21,9 +21,6 @@ const orderRepository = new OrderRepositoryMemory()
 const couponRepository = new CouponRepositoryMemory()
 const zipCodeRepository = new ZipCodeRepositoryDatabase(connection)
 couponRepository.save(new Coupon('VALE20', 20))
-// const calculateFreightGateway: CalculateFreightGateway = {
-//   calculate: async () => 280,
-// }
 const calculateFreightGateway = new CalculateFreightGatewayHttp()
 const catalogGateway = new CatalogGatewayHttp()
 const preview = new Preview(
@@ -36,8 +33,7 @@ const checkout = new Checkout(repositoryFactory)
 const getOrderByCpf = new GetOrderByCpf(orderRepository)
 const simulateFreight = new SimulateFreight(itemRepository, zipCodeRepository)
 const validateCoupon = new ValidateCoupon(couponRepository)
-// const httpServer = new ExpressAdapter()
-const httpServer = new HapiAdapter()
+const httpServer = new ExpressAdapter()
 new OrderController(
   httpServer,
   preview,
