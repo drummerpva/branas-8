@@ -7,8 +7,10 @@ async function init() {
   await channel.assertExchange('checkout', 'direct', { durable: true })
   await channel.assertQueue('checkout.a', { durable: true })
   await channel.assertQueue('checkout.b', { durable: true })
-  await channel.bindQueue('checkout.a', 'checkout', 'payment')
-  await channel.bindQueue('checkout.b', 'checkout', 'stock')
+  await channel.assertQueue('checkout.c', { durable: true })
+  await channel.bindQueue('checkout.a', 'checkout', '')
+  await channel.bindQueue('checkout.b', 'checkout', '')
+  await channel.bindQueue('checkout.c', 'checkout', '')
   const event = {
     orderItems: [
       {
@@ -25,7 +27,11 @@ async function init() {
     console.log('B', message.content.toString())
     channel.ack(message)
   })
-  channel.publish('checkout', 'payment', Buffer.from(JSON.stringify(event)))
+  await channel.consume('checkout.c', (message: any) => {
+    console.log('C', message.content.toString())
+    channel.ack(message)
+  })
+  channel.publish('checkout', '', Buffer.from(JSON.stringify(event)))
   await sleep(500)
   await connection.close()
 }
