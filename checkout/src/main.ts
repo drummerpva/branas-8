@@ -14,6 +14,7 @@ import { ZipCodeRepositoryDatabase } from './infra/repository/database/ZipCodeRe
 import { CalculateFreightGatewayHttp } from './infra/gateway/CalculateFreightGatewayHttp'
 import { CatalogGatewayHttp } from './infra/gateway/CatalogGatewayHttp'
 import { ExpressAdapter } from './infra/http/ExpressAdapter'
+import { DecrementStockGatewayHttp } from './infra/gateway/DecrementStockGatewayHttp'
 
 const connection = new Mysql2Adapter()
 const itemRepository = new ItemRepositoryDatabase(connection)
@@ -29,7 +30,8 @@ const preview = new Preview(
   calculateFreightGateway,
 )
 const repositoryFactory = new RepositoyFactoryMemory()
-const checkout = new Checkout(repositoryFactory)
+const decrementStockGateway = new DecrementStockGatewayHttp()
+const checkout = new Checkout(repositoryFactory, decrementStockGateway)
 const getOrderByCpf = new GetOrderByCpf(orderRepository)
 const simulateFreight = new SimulateFreight(itemRepository, zipCodeRepository)
 const validateCoupon = new ValidateCoupon(couponRepository)
