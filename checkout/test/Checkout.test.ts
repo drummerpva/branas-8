@@ -14,6 +14,8 @@ import { Mysql2Adapter } from '../src/infra/database/Mysql2Adapter'
 import { OrderRepositoryDatabase } from '../src/infra/repository/database/OrderRepositoryDatabase'
 import { DecrementStockGateway } from '../src/application/gateway/DecrementStockGateway'
 import { DecrementStockGatewayHttp } from '../src/infra/gateway/DecrementStockGatewayHttp'
+import { Queue } from '../src/infra/queue/Queue'
+import { RabbitMQAdapter } from '../src/infra/queue/RabbitMQAdapter'
 
 let itemRepository: ItemRepository
 let orderRepository: OrderRepository
@@ -22,6 +24,7 @@ let repositoryFactory: RepositoryFactory
 let connection: Connection
 let decrementStockGateway: DecrementStockGateway
 let checkout: Checkout
+let queue: Queue
 
 beforeEach(async () => {
   // repositoryFactory = new RepositoyFactoryMemory()
@@ -31,14 +34,19 @@ beforeEach(async () => {
   orderRepository = repositoryFactory.createOrderRepository()
   couponRepository = repositoryFactory.createCouponRepository()
   decrementStockGateway = new DecrementStockGatewayHttp()
+  queue = new RabbitMQAdapter()
+  await queue.connect()
   // itemRepository.save(new Item(1, 'Guitarra', 1000))
   // itemRepository.save(new Item(2, 'Amplificador', 5000))
   // itemRepository.save(new Item(3, 'Cabo', 30))
   // couponRepository.save(new Coupon('VALE20', 20))
-  checkout = new Checkout(repositoryFactory, decrementStockGateway)
+  checkout = new Checkout(repositoryFactory, decrementStockGateway, queue)
   await connection.query('DELETE FROM order_item', [])
   await connection.query('DELETE FROM orders', [])
   await connection.query('DELETE FROM coupons', [])
+})
+afterEach(async () => {
+  await queue.close()
 })
 
 test('Deve fazer o pedido', async () => {
@@ -137,6 +145,7 @@ test('Deve fazer o pedido com frete', async () => {
   const checkoutLocal = new Checkout(
     repositoryFactoryMemory,
     decrementStockGateway,
+    queue,
   )
   const input = {
     cpf: '987.654.321-00',

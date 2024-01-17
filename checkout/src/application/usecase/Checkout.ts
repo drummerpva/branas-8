@@ -7,6 +7,7 @@ import { FreightCalculator } from '../../domain/entity/FreightCalculator'
 import { ZipCodeRepository } from '../repository/ZipCodeRepository'
 import { DistanceCalculator } from '../../domain/entity/DistanceCalculator'
 import { DecrementStockGateway } from '../gateway/DecrementStockGateway'
+import { Queue } from '../../infra/queue/Queue'
 
 export class Checkout {
   itemRepository: ItemRepository
@@ -16,6 +17,7 @@ export class Checkout {
   constructor(
     repositoryFactory: RepositoryFactory,
     readonly decrementStockGateway: DecrementStockGateway,
+    readonly queue: Queue,
   ) {
     this.itemRepository = repositoryFactory.createItemRepository()
     this.orderRepository = repositoryFactory.createOrderRepository()
@@ -37,10 +39,14 @@ export class Checkout {
       order.addItem(item, orderItem.quantity)
       order.freight +=
         FreightCalculator.calculate(item, distance) * orderItem.quantity
-      await this.decrementStockGateway.execute(
-        orderItem.idItem,
-        orderItem.quantity,
-      )
+      // await this.decrementStockGateway.execute(
+      //   orderItem.idItem,
+      //   orderItem.quantity,
+      // )
+      await this.queue.publish('checkout', {
+        idItem: orderItem.idItem,
+        quantity: orderItem.quantity,
+      })
     }
     if (input.coupon) {
       const coupon = await this.couponRepository.getCoupon(input.coupon)
