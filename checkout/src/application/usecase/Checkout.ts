@@ -8,6 +8,7 @@ import { ZipCodeRepository } from '../repository/ZipCodeRepository'
 import { DistanceCalculator } from '../../domain/entity/DistanceCalculator'
 import { DecrementStockGateway } from '../gateway/DecrementStockGateway'
 import { Queue } from '../../infra/queue/Queue'
+import { OrderPlaced } from '../../domain/event/OrderPlaced'
 
 export class Checkout {
   itemRepository: ItemRepository
@@ -43,10 +44,6 @@ export class Checkout {
       //   orderItem.idItem,
       //   orderItem.quantity,
       // )
-      await this.queue.publish('checkout', {
-        idItem: orderItem.idItem,
-        quantity: orderItem.quantity,
-      })
     }
     if (input.coupon) {
       const coupon = await this.couponRepository.getCoupon(input.coupon)
@@ -55,6 +52,8 @@ export class Checkout {
       }
     }
     await this.orderRepository.save(order)
+    const orderPlacedEvent = new OrderPlaced(order)
+    await this.queue.publish(orderPlacedEvent.name, orderPlacedEvent.order)
   }
 }
 
