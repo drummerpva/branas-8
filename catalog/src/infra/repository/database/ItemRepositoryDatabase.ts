@@ -25,6 +25,24 @@ export class ItemRepositoryDatabase implements ItemRepository {
     return item
   }
 
+  async list(): Promise<Item[]> {
+    const itemsData = await this.connection.query('SELECT * FROM item ', [])
+    return itemsData.map(
+      (itemData: any) =>
+        new Item(
+          itemData.id,
+          itemData.nome,
+          Number(itemData.valor),
+          new Dimension(
+            itemData.largura,
+            itemData.altura,
+            itemData.profundidade,
+            itemData.peso,
+          ),
+        ),
+    )
+  }
+
   async save(item: Item): Promise<void> {
     /* await this.connection.query(
       'INSERT INTO item (nome, valor) VALUES (?, ?)',
