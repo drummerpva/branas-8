@@ -1,10 +1,11 @@
 'use client'
+import { useDependecies } from '@/Contexts/Dependencies'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import axios from 'axios'
 import { useCallback, useEffect, useState } from 'react'
 
 export default function Home() {
+  const { catalogGateway, checkoutGateway } = useDependecies()
   const [items, setItems] = useState<any[]>()
   const [orders, setOrders] = useState<any[]>()
   const [order, setOrder] = useState<any>({
@@ -16,27 +17,31 @@ export default function Home() {
 
   useEffect(() => {
     const onLoad = async () => {
-      const { data } = await axios.get('http://localhost:3002/items')
-      setItems(data)
+      const items = await catalogGateway.getItems()
+      setItems(items)
     }
-    onLoad()
-  }, [])
-  const handlePreview = useCallback(async (orderToPreview: any) => {
-    const {
-      data: { total },
-    } = await axios.post('http://localhost:3000/preview', orderToPreview)
-    setOrder((oldOrder: any) => ({ ...oldOrder, total }))
-  }, [])
-  const getOrdersByCpf = useCallback(async (cpf: string) => {
-    setOrders([])
-    const { data: orders } = await axios.get(
-      `http://localhost:3000/orders/${cpf}`,
-    )
-    setOrders(orders)
-  }, [])
+    return () => {
+      onLoad()
+    }
+  }, [catalogGateway])
+  const handlePreview = useCallback(
+    async (orderToPreview: any) => {
+      const total = await checkoutGateway.preview(orderToPreview)
+      setOrder((oldOrder: any) => ({ ...oldOrder, total }))
+    },
+    [checkoutGateway],
+  )
+  const getOrdersByCpf = useCallback(
+    async (cpf: string) => {
+      setOrders([])
+      const orders = await checkoutGateway.getOrdersByCpf(cpf)
+      setOrders(orders)
+    },
+    [checkoutGateway],
+  )
   const handleCheckout = useCallback(
     async (orderToCheckout: any) => {
-      await axios.post('http://localhost:3000/checkout', orderToCheckout)
+      await checkoutGateway.checkout(orderToCheckout)
       setOrder((oldOrder: any) => ({
         ...oldOrder,
         orderItems: [],
@@ -45,7 +50,7 @@ export default function Home() {
       }))
       await getOrdersByCpf(orderToCheckout.cpf)
     },
-    [getOrdersByCpf],
+    [getOrdersByCpf, checkoutGateway],
   )
 
   const addItem = useCallback(
@@ -103,11 +108,7 @@ export default function Home() {
         handlePreview(newOrder)
         return newOrder
       })
-      const {
-        data: { valid },
-      } = await axios.post('http://localhost:3000/validateCoupon', {
-        code: value,
-      })
+      const valid = await checkoutGateway.validateCoupon(value)
       if (valid) {
         setOrder((oldOrder: any) => {
           const newOrder = { ...oldOrder, coupon: value }
@@ -116,7 +117,7 @@ export default function Home() {
         })
       }
     },
-    [handlePreview],
+    [handlePreview, checkoutGateway],
   )
 
   return (
