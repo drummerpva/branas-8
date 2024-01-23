@@ -7,6 +7,7 @@ import { AxiosAdapter } from '@/infra/AxiosAdapter'
 
 export const AllProviders = ({ children }: { children: React.ReactNode }) => {
   const httpClient = new AxiosAdapter()
+  // const httpClient = new FetchAdapter()
   return (
     <ThemeProvider
       attribute="class"
