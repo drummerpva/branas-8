@@ -1,5 +1,6 @@
 import { HttpClient } from '@/infra/HttpClient'
 import { CatalogGateway } from './CatalogGateway'
+import { Item } from '@/entities/Item'
 
 export class CatalogHttpGateway implements CatalogGateway {
   constructor(
@@ -7,8 +8,14 @@ export class CatalogHttpGateway implements CatalogGateway {
     readonly baseUrl: string,
   ) {}
 
-  async getItems(): Promise<any> {
-    const items = await this.httpClient.get(`${this.baseUrl}/items`)
+  async getItems(): Promise<Item[]> {
+    const itemsData = await this.httpClient.get(`${this.baseUrl}/items`)
+    const items: Item[] = []
+    for (const itemData of itemsData) {
+      items.push(
+        new Item(itemData.idItem, itemData.description, itemData.price),
+      )
+    }
     return items
   }
 }

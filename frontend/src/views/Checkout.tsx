@@ -1,36 +1,42 @@
 'use client'
 import { useDependecies } from '@/Contexts/Dependencies'
+import { ItemComponent } from '@/components/ItemComponent'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Item } from '@/entities/Item'
+import { Observer } from '@/entities/Observer'
+import { Order } from '@/entities/Order'
 import { useCallback, useEffect, useState } from 'react'
 
 export function Checkout() {
   const { catalogGateway, checkoutGateway } = useDependecies()
-  const [items, setItems] = useState<any[]>()
+  const [items, setItems] = useState<Item[]>()
   const [orders, setOrders] = useState<any[]>()
-  const [order, setOrder] = useState<any>({
-    orderItems: [],
-    cpf: '98765432100',
-    coupon: '',
+  const [state, setState] = useState<any>({
+    order: new Order('98765432100'),
     total: 0,
   })
+
+  const handlePreview = useCallback(
+    async (orderToPreview: any) => {
+      const total = await checkoutGateway.preview(orderToPreview)
+      setState((oldState: any) => ({ ...oldState, total }))
+    },
+    [checkoutGateway],
+  )
 
   useEffect(() => {
     const onLoad = async () => {
       const items = await catalogGateway.getItems()
       setItems(items)
+      state.order.register(new Observer('addOrderItem', handlePreview))
+      state.order.register(new Observer('removeOrderItem', handlePreview))
     }
     return () => {
       onLoad()
     }
-  }, [catalogGateway])
-  const handlePreview = useCallback(
-    async (orderToPreview: any) => {
-      const total = await checkoutGateway.preview(orderToPreview)
-      setOrder((oldOrder: any) => ({ ...oldOrder, total }))
-    },
-    [checkoutGateway],
-  )
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [catalogGateway, handlePreview])
   const getOrdersByCpf = useCallback(
     async (cpf: string) => {
       setOrders([])
@@ -42,104 +48,64 @@ export function Checkout() {
   const handleCheckout = useCallback(
     async (orderToCheckout: any) => {
       await checkoutGateway.checkout(orderToCheckout)
-      setOrder((oldOrder: any) => ({
+      setState((oldOrder: any) => ({
         ...oldOrder,
-        orderItems: [],
+        order: {
+          ...oldOrder.order,
+          orderItems: [],
+          coupon: '',
+        },
         total: 0,
-        coupon: '',
       }))
       await getOrdersByCpf(orderToCheckout.cpf)
     },
     [getOrdersByCpf, checkoutGateway],
   )
 
-  const addItem = useCallback(
-    (item: any) => {
-      setOrder((prev: any) => {
-        const newOrder = {
-          ...prev,
-          orderItems: !prev.orderItems.some(
-            (orderItem: any) => orderItem.idItem === item.idItem,
-          )
-            ? [...prev.orderItems, { idItem: item.idItem, quantity: 1 }]
-            : prev.orderItems.map((orderItem: any) => {
-                if (orderItem.idItem === item.idItem)
-                  return { ...orderItem, quantity: orderItem.quantity + 1 }
-                return orderItem
-              }),
-        }
-        handlePreview(newOrder)
-        return newOrder
-      })
-    },
-    [handlePreview],
-  )
-
-  const removerOrderItem = useCallback(
-    (item: any) => {
-      setOrder((prev: any) => {
-        const newOrder = {
-          ...prev,
-          orderItems: prev.orderItems
-            .map((orderItem: any) => {
-              if (orderItem.idItem === item.idItem)
-                return { ...orderItem, quantity: orderItem.quantity - 1 }
-              return orderItem
-            })
-            .filter((orderItem: any) => orderItem.quantity > 0),
-        }
-        handlePreview(newOrder)
-        return newOrder
-      })
-    },
-    [handlePreview],
-  )
-
   const handleChange = useCallback((event: any) => {
     const { name, value } = event.target
-    setOrder((oldOrder: any) => ({ ...oldOrder, [name]: value?.toUpperCase() }))
+    setState((oldOrder: any) => ({
+      ...oldOrder,
+      order: {
+        ...oldOrder.order,
+        [name]: value?.toUpperCase(),
+      },
+    }))
   }, [])
 
   const validateCoupon = useCallback(
     async (value: string) => {
       if (!value) return
-      setOrder((oldOrder: any) => {
-        const newOrder = { ...oldOrder, coupon: '' }
-        handlePreview(newOrder)
-        return newOrder
-      })
+      state.order.coupon = ''
+      handlePreview(state.order)
       const valid = await checkoutGateway.validateCoupon(value)
       if (valid) {
-        setOrder((oldOrder: any) => {
-          const newOrder = { ...oldOrder, coupon: value }
-          handlePreview(newOrder)
-          return newOrder
-        })
+        state.order.coupon = value
+        handlePreview(state.order)
       }
     },
-    [handlePreview, checkoutGateway],
+    [handlePreview, checkoutGateway, state.order],
   )
 
   return (
     <>
       <h1 className="text-2xl">Checkout</h1>
       {items?.map((item) => (
-        <p key={item.idItem} className="text-xl">
-          {item.description} - {item.price}
-          <Button className="ml-4" onClick={() => addItem(item)}>
-            Add
-          </Button>
-        </p>
+        <ItemComponent
+          key={item.idItem}
+          item={item}
+          handleAdd={(itemToAdd: Item) => state.order.addItem(itemToAdd)}
+        />
       ))}
 
       <h2 className="text-2xl mt-4">Order</h2>
       <p>
-        CPF: <Input value={order.cpf} className="max-w-48" />
+        CPF: <Input value={state.order.cpf} className="max-w-48" />
       </p>
       <p>
         Coupon:{' '}
         <Input
-          value={order.coupon}
+          value={state.order.coupon}
           placeholder="Coupon"
           className="max-w-48"
           name="coupon"
@@ -148,25 +114,28 @@ export function Checkout() {
         />
       </p>
       <p>Items:</p>
-      {order.orderItems.map((item: any) => (
+      {state.order.orderItems.map((item: any) => (
         <p key={item.idItem} className="mb-2">
           idItem: {item.idItem} - quantity: {item.quantity}{' '}
-          <Button variant="destructive" onClick={() => removerOrderItem(item)}>
+          <Button
+            variant="destructive"
+            onClick={() => state.order.removeItem(item)}
+          >
             -
           </Button>
         </p>
       ))}
       <p>
-        Total: <strong>{order.total}</strong>
+        Total: <strong>{state.total}</strong>
       </p>
-      <Button variant="secondary" onClick={() => handleCheckout(order)}>
+      <Button variant="secondary" onClick={() => handleCheckout(state.order)}>
         Checkout
       </Button>
       <hr />
       <Button
         variant="secondary"
         className="mt-4"
-        onClick={() => getOrdersByCpf(order.cpf)}
+        onClick={() => getOrdersByCpf(state.order.cpf)}
       >
         Get Orders
       </Button>
