@@ -1,6 +1,7 @@
 'use client'
 import { useDependecies } from '@/Contexts/Dependencies'
 import { ItemComponent } from '@/components/ItemComponent'
+import { OrderComponent } from '@/components/OrderComponent'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Item } from '@/entities/Item'
@@ -50,11 +51,10 @@ export function Checkout() {
       await checkoutGateway.checkout(orderToCheckout)
       setState((oldOrder: any) => ({
         ...oldOrder,
-        order: {
-          ...oldOrder.order,
+        order: Object.assign(oldOrder.order, {
           orderItems: [],
           coupon: '',
-        },
+        }),
         total: 0,
       }))
       await getOrdersByCpf(orderToCheckout.cpf)
@@ -66,10 +66,7 @@ export function Checkout() {
     const { name, value } = event.target
     setState((oldOrder: any) => ({
       ...oldOrder,
-      order: {
-        ...oldOrder.order,
-        [name]: value?.toUpperCase(),
-      },
+      order: Object.assign(oldOrder.order, { [name]: value?.toUpperCase() }),
     }))
   }, [])
 
@@ -98,39 +95,13 @@ export function Checkout() {
         />
       ))}
 
-      <h2 className="text-2xl mt-4">Order</h2>
-      <p>
-        CPF: <Input value={state.order.cpf} className="max-w-48" />
-      </p>
-      <p>
-        Coupon:{' '}
-        <Input
-          value={state.order.coupon}
-          placeholder="Coupon"
-          className="max-w-48"
-          name="coupon"
-          onChange={handleChange}
-          onBlur={({ target: { value } }) => validateCoupon(value)}
-        />
-      </p>
-      <p>Items:</p>
-      {state.order.orderItems.map((item: any) => (
-        <p key={item.idItem} className="mb-2">
-          idItem: {item.idItem} - quantity: {item.quantity}{' '}
-          <Button
-            variant="destructive"
-            onClick={() => state.order.removeItem(item)}
-          >
-            -
-          </Button>
-        </p>
-      ))}
-      <p>
-        Total: <strong>{state.total}</strong>
-      </p>
-      <Button variant="secondary" onClick={() => handleCheckout(state.order)}>
-        Checkout
-      </Button>
+      <OrderComponent
+        handleChange={handleChange}
+        validateCoupon={validateCoupon}
+        handleCheckout={handleCheckout}
+        order={state.order}
+        total={state.total}
+      />
       <hr />
       <Button
         variant="secondary"
