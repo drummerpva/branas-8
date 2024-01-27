@@ -21,7 +21,8 @@ export function OrderComponent({
     <>
       <h2 className="text-2xl mt-4">Order</h2>
       <p>
-        CPF: <Input value={order.cpf} className="max-w-48" />
+        CPF:{' '}
+        <Input value={order.cpf} className="max-w-48" onChange={handleChange} />
       </p>
       <p>
         Coupon:{' '}
@@ -35,7 +36,7 @@ export function OrderComponent({
         />
       </p>
       <p>Items:</p>
-      {order.orderItems.map((item: any) => (
+      {order.orderItems.map((item: any, index: number) => (
         <p key={item.idItem} className="mb-2">
           idItem: {item.idItem} - quantity: {item.quantity}{' '}
           <Button variant="destructive" onClick={() => order.removeItem(item)}>
@@ -43,9 +44,7 @@ export function OrderComponent({
           </Button>
         </p>
       ))}
-      <p>
-        Total: <strong>{total}</strong>
-      </p>
+      <p>Total: {total}</p>
       <Button variant="secondary" onClick={() => handleCheckout(order)}>
         Checkout
       </Button>

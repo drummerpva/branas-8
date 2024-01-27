@@ -10,7 +10,11 @@ export function ItemComponent({ item, handleAdd }: ItemComponentProps) {
   return (
     <p className="text-xl">
       {item.description} - {item.price}
-      <Button className="ml-4" onClick={() => handleAdd(item)}>
+      <Button
+        className="ml-4"
+        onClick={() => handleAdd(item)}
+        data-testid={`add-item-${item.idItem}`}
+      >
         Add
       </Button>
     </p>

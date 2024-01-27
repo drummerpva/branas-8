@@ -32,9 +32,10 @@ export function Checkout() {
       state.order.register(new Observer('addOrderItem', handlePreview))
       state.order.register(new Observer('removeOrderItem', handlePreview))
     }
-    return () => {
-      onLoad()
-    }
+    onLoad()
+    // return () => {
+    //   onLoad()
+    // }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [catalogGateway, handlePreview])
   const getOrdersByCpf = useCallback(
