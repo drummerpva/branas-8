@@ -118,6 +118,9 @@ export function Checkout() {
               {order.code} - {order.total}
             </p>
           ))}
+          <pre>
+            <code>{JSON.stringify(orders, null, 2)}</code>
+          </pre>
         </>
       )}
     </>

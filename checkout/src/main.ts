@@ -13,6 +13,7 @@ import { ExpressAdapter } from './infra/http/ExpressAdapter'
 import { DecrementStockGatewayHttp } from './infra/gateway/DecrementStockGatewayHttp'
 import { RabbitMQAdapter } from './infra/queue/RabbitMQAdapter'
 import { RepositoryFactoryDatabase } from './infra/factory/RepositoryFactoryDatabase'
+import { GetOrderByCpfQuery } from './application/query/GetOrderByCpfQuery'
 
 async function init() {
   const connection = new Mysql2Adapter()
@@ -32,7 +33,8 @@ async function init() {
   const queue = new RabbitMQAdapter()
   await queue.connect()
   const checkout = new Checkout(repositoryFactory, decrementStockGateway, queue)
-  const getOrderByCpf = new GetOrderByCpf(orderRepository)
+  const getOrderByCpf = new GetOrderByCpf(orderRepository, catalogGateway)
+  const getOrderByCpfQuery = new GetOrderByCpfQuery(connection)
   const simulateFreight = new SimulateFreight(itemRepository, zipCodeRepository)
   const validateCoupon = new ValidateCoupon(couponRepository)
   const httpServer = new ExpressAdapter()
@@ -43,6 +45,7 @@ async function init() {
     getOrderByCpf,
     simulateFreight,
     validateCoupon,
+    getOrderByCpfQuery,
   )
   httpServer.listen(3000)
 }

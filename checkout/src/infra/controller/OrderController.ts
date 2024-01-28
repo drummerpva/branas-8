@@ -1,3 +1,4 @@
+import { GetOrderByCpfQuery } from '../../application/query/GetOrderByCpfQuery'
 import { Checkout } from '../../application/usecase/Checkout'
 import { GetOrderByCpf } from '../../application/usecase/GetOrderByCpf'
 import { Preview } from '../../application/usecase/Preview'
@@ -13,6 +14,7 @@ export class OrderController {
     readonly getOrderByCpf: GetOrderByCpf,
     readonly simulateFreight: SimulateFreight,
     readonly validateCoupon: ValidateCoupon,
+    readonly getOrderByCpfQuery: GetOrderByCpfQuery,
   ) {
     httpServer.on('post', '/preview', async (params: any, body: any) => {
       const total = await preview.execute(body)
@@ -22,7 +24,8 @@ export class OrderController {
       await checkout.execute(body)
     })
     httpServer.on('get', '/orders/:cpf', async (params: any) => {
-      const orders = await getOrderByCpf.execute(params.cpf)
+      // const orders = await getOrderByCpf.execute(params.cpf)
+      const orders = await getOrderByCpfQuery.execute(params.cpf)
       return orders
     })
     httpServer.on(
